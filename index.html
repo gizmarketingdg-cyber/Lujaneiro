@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário de Conteúdo - Dra. Lu Basílio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #764ba2;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0 30px 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 12px 25px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .week-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 30px 0 15px 0;
+        }
+
+        .week-header h2 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .week-theme {
+            font-size: 1em;
+            opacity: 0.95;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border: 2px solid #f0f0f0;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-date {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .card-type {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .card-type.reel {
+            background: #ff6b9d;
+            color: white;
+        }
+
+        .card-type.carrossel {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .card-type.post {
+            background: #ffa726;
+            color: white;
+        }
+
+        .card-title {
+            color: #333;
+            font-size: 1.15em;
+            font-weight: 700;
+            margin: 12px 0;
+            line-height: 1.3;
+        }
+
+        .card-description {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .view-details-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .view-details-btn:hover {
+            background: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .details-content {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .details-content.active {
+            display: block;
+        }
+
+        .script-section {
+            margin: 10px 0;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .script-section h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .script-text {
+            color: #555;
+            font-size: 0.85em;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📅 Calendário de Conteúdo</h1>
+            <div class="subtitle">Dra. Lu Basílio | Janeiro a Fevereiro 2026</div>
+            <div class="subtitle" style="font-size: 0.95em; color: #888; margin-top: 5px;">
+                Tema: "Renovação Pós-Festas & Verão"
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number">20</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">8</div>
+                <div class="stat-label">Reels</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Carrosséis</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Posts</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterContent('all')">✨ Todos</button>
+            <button class="filter-btn" onclick="filterContent('reel')">🎬 Reels</button>
+            <button class="filter-btn" onclick="filterContent('carrossel')">🎠 Carrosséis</button>
+            <button class="filter-btn" onclick="filterContent('post')">📄 Posts</button>
+        </div>
+
+        <!-- SEMANA 1 -->
+        <div class="week-header">
+            <h2>SEMANA 1 | 10 a 16 de Janeiro</h2>
+            <div class="week-theme">Volta das férias com pele renovada</div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Card 1 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">10/01 (sex)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">5 erros que você está cometendo com sua pele no verão</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Trending audio + transições<br>
+                    <strong>Gancho:</strong> "PARE AGORA! ⚠️"
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Script Completo</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>🎬 SCRIPT RESUMIDO</h4>
+                        <p class="script-text"><strong>GANCHO:</strong> "Você está cometendo esses 5 erros..."
+
+<strong>ERROS:</strong>
+1. Passar protetor só de manhã
+2. Não hidratar depois do sol
+3. Usar produtos muito pesados
+4. Esquecer o pós-sol
+5. Dormir sem limpar a pele
+
+<strong>CTA:</strong> "Vem cuidar da sua pele comigo!"
+
+<strong>#Hashtags:</strong> #CuidadosComAPele #PeleNoVerão #BiomedicínaEstética</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="content-card" data-type="carrossel">
+                <div class="card-header">
+                    <div class="card-date">13/01 (seg)</div>
+                    <div class="card-type carrossel">🎠 CARROSSEL</div>
+                </div>
+                <div class="card-title">Guia completo: Cuidados essenciais com a pele no verão</div>
+                <div class="card-description">
+                    <strong>Slides:</strong> 7 slides<br>
+                    <strong>Temas:</strong> Proteção | Hidratação | Limpeza | Produtos | Tratamentos
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Slides</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>📄 SLIDES</h4>
+                        <p class="script-text"><strong>SLIDE 1:</strong> Capa - "Guia Completo"
+
+<strong>SLIDE 2:</strong> Proteção Solar
+- FPS mínimo 30
+- Reaplicar a cada 2-3h
+- Usar sempre
+
+<strong>SLIDE 3:</strong> Hidratação Intensiva
+- 2L água/dia
+- Hidratante específico
+- Máscaras 2x/semana
+
+<strong>SLIDE 4:</strong> Limpeza Profunda
+- Limpar 2x ao dia
+- Não dormir maquiada
+- Esfoliação semanal
+
+<strong>SLIDE 5-7:</strong> Produtos + Tratamentos + CTA</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="content-card" data-type="post">
+                <div class="card-header">
+                    <div class="card-date">15/01 (qua)</div>
+                    <div class="card-type post">📄 POST</div>
+                </div>
+                <div class="card-title">Por que sua pele precisa de atenção especial agora?</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Imagem + texto educativo<br>
+                    <strong>Tema:</strong> Danos do verão
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Legenda</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>💬 LEGENDA</h4>
+                        <p class="script-text">Durante o verão, a pele sofre com:
+☀️ Radiação UV acumulada
+🌊 Água do mar e cloro
+💦 Desidratação
+🏖️ Mudança de rotina
+
+Janeiro é o momento perfeito para reparar esses danos!
+
+📲 Agende sua avaliação gratuita</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">16/01 (qui)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">POV: Você relaxou nas férias mas esqueceu da pele</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Humor + solução<br>
+                    <strong>Gancho:</strong> "Você nas férias vs Sua pele agora"
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Script</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>🎬 SCRIPT</h4>
+                        <p class="script-text"><strong>PARTE 1:</strong> "Sol, praia, piscina, festa..."
+
+<strong>PARTE 2:</strong> Mostrar: manchas, ressecamento, oleosidade
+
+<strong>SOLUÇÃO:</strong> Tratamentos de recuperação
+- Hidratação profunda
+- Tratamento de manchas
+- Renovação celular</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEMANA 2 -->
+        <div class="week-header">
+            <h2>SEMANA 2 | 17 a 23 de Janeiro</h2>
+            <div class="week-theme">Cuidados pós-procedimentos & recuperação</div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Card 5 -->
+            <div class="content-card" data-type="carrossel">
+                <div class="card-header">
+                    <div class="card-date">20/01 (seg)</div>
+                    <div class="card-type carrossel">🎠 CARROSSEL</div>
+                </div>
+                <div class="card-title">Fez botox? Estes cuidados são OBRIGATÓRIOS</div>
+                <div class="card-description">
+                    <strong>Slides:</strong> 7 slides<br>
+                    <strong>Temas:</strong> 24h | 1ª semana | O que evitar | Retorno | Resultados
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Slides</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>📄 PRINCIPAIS CUIDADOS</h4>
+                        <p class="script-text"><strong>PRIMEIRAS 24H:</strong>
+❌ Não deitar por 4h
+❌ Não fazer exercícios
+❌ Não mexer na região
+
+<strong>PRIMEIRA SEMANA:</strong>
+❌ Evitar exercícios intensos
+❌ Sem massagens faciais
+❌ Protetor FPS 50+
+
+<strong>RESULTADOS:</strong>
+Efeito em 7-15 dias
+Duração: 4-6 meses</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="content-card" data-type="post">
+                <div class="card-header">
+                    <div class="card-date">21/01 (ter)</div>
+                    <div class="card-type post">📄 POST</div>
+                </div>
+                <div class="card-title">Exagerou nas festas? Seu corpo está pedindo socorro</div>
+                <div class="card-description">
+                    <strong>Tema:</strong> Inchaço, retenção, toxinas<br>
+                    <strong>Solução:</strong> Drenagem e tratamentos detox
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Legenda</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>💬 MENSAGEM</h4>
+                        <p class="script-text">Sinais que o corpo está sobrecarregado:
+⚠️ Inchaço persistente
+⚠️ Retenção de líquido
+⚠️ Barriga inchada
+⚠️ Celulite aparente
+
+<strong>SOLUÇÃO:</strong>
+Tratamentos detox:
+✓ Drenagem linfática
+✓ Massagem modeladora
+✓ Eliminação de toxinas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">22/01 (qua)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">3 tratamentos que sua pele está pedindo</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Lista rápida<br>
+                    <strong>Tema:</strong> Recuperação pós-verão
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Script</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>🎬 TRATAMENTOS</h4>
+                        <p class="script-text">1. HIDRATAÇÃO PROFUNDA 💧
+Repõe água nas camadas profundas
+
+2. PEELING SUAVE 🌟
+Remove células mortas e danificadas
+
+3. REVITALIZAÇÃO FACIAL ✨
+Estimula colágeno e trata manchas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 8 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">23/01 (qui)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">Checklist pós-botox (1ª semana)</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Lista prática<br>
+                    <strong>Gancho:</strong> "SALVA ESSE VÍDEO!"
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Checklist</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>✅ CHECKLIST</h4>
+                        <p class="script-text">✅ Não deitar por 4h
+✅ Evitar exercícios 3-5 dias
+✅ Não massagear região
+✅ Dormir de barriga pra cima
+✅ Protetor FPS 50+
+✅ Evitar calor intenso
+✅ Sem procedimentos faciais
+✅ Movimentos leves orientados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEMANA 3 -->
+        <div class="week-header">
+            <h2>SEMANA 3 | 24 a 30 de Janeiro</h2>
+            <div class="week-theme">Tratamentos redutores e modeladores</div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Card 9 -->
+            <div class="content-card" data-type="carrossel">
+                <div class="card-header">
+                    <div class="card-date">27/01 (seg)</div>
+                    <div class="card-type carrossel">🎠 CARROSSEL</div>
+                </div>
+                <div class="card-title">Massagem redutora: O que é, como funciona</div>
+                <div class="card-description">
+                    <strong>Slides:</strong> 8 slides<br>
+                    <strong>Temas:</strong> Definição | Indicações | Técnicas | Resultados
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Conteúdo</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>📄 PRINCIPAIS PONTOS</h4>
+                        <p class="script-text"><strong>O QUE É:</strong>
+Técnica que quebra células de gordura
+
+<strong>INDICAÇÕES:</strong>
+- Gordura localizada
+- Culote, flancos, abdômen
+- Medidas resistentes
+
+<strong>FREQUÊNCIA:</strong>
+2-3x/semana (fase intensiva)
+10-20 sessões no total
+
+<strong>IMPORTANTE:</strong>
+Funciona melhor com alimentação + exercício!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 10 -->
+            <div class="content-card" data-type="post">
+                <div class="card-header">
+                    <div class="card-date">28/01 (ter)</div>
+                    <div class="card-type post">📄 POST</div>
+                </div>
+                <div class="card-title">A verdade sobre gordura localizada</div>
+                <div class="card-description">
+                    <strong>Tom:</strong> Educativo e realista<br>
+                    <strong>Tema:</strong> Ciência + tratamentos
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Conteúdo</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>💬 MENSAGEM PRINCIPAL</h4>
+                        <p class="script-text">Por que algumas gorduras são teimosas:
+🧬 Genética
+🧬 Hormônios
+🧬 Receptores celulares
+🧬 Tipo de gordura
+
+<strong>VERDADE:</strong>
+Você não pode escolher onde emagrecer
+
+<strong>SOLUÇÃO:</strong>
+Tratamentos + dieta + exercício = resultados!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 11 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">29/01 (qua)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">Como a massagem redutora age</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Explicação didática<br>
+                    <strong>Tema:</strong> Processo científico
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Etapas</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>🎬 PROCESSO</h4>
+                        <p class="script-text">1. QUEBRA DE GORDURA 🔥
+Movimentos quebram células
+
+2. ATIVAÇÃO CIRCULATÓRIA 💓
+Sangue leva gordura embora
+
+3. DRENAGEM 💧
+Sistema linfático elimina toxinas
+
+4. MODELAGEM 💪
+Redução de medidas + contorno</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 12 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">30/01 (qui)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">Redutora ou modeladora?</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Comparativo rápido<br>
+                    <strong>Gancho:</strong> "Descubra qual é ideal"
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Comparação</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>⚖️ COMPARATIVO</h4>
+                        <p class="script-text"><strong>REDUTORA:</strong>
+- Quebra gordura
+- Reduz medidas
+- Mais intensa
+Para: quem tem gordura localizada
+
+<strong>MODELADORA:</strong>
+- Define contorno
+- Tonifica
+- Menos invasiva
+Para: quem está no peso ideal</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEMANA 4 -->
+        <div class="week-header">
+            <h2>SEMANA 4 | 31 Jan a 6 Fevereiro</h2>
+            <div class="week-theme">Relaxamento e autocuidado</div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Card 13 -->
+            <div class="content-card" data-type="carrossel">
+                <div class="card-header">
+                    <div class="card-date">03/02 (seg)</div>
+                    <div class="card-type carrossel">🎠 CARROSSEL</div>
+                </div>
+                <div class="card-title">Massagem relaxante: Benefícios além do relaxamento</div>
+                <div class="card-description">
+                    <strong>Slides:</strong> 7 slides<br>
+                    <strong>Temas:</strong> Físico | Mental | Quando fazer
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Benefícios</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>📄 BENEFÍCIOS</h4>
+                        <p class="script-text"><strong>FÍSICOS:</strong>
+✓ Alivia tensão muscular
+✓ Melhora circulação
+✓ Reduz pressão arterial
+✓ Melhora sono
+
+<strong>MENTAIS:</strong>
+✓ Reduz estresse/ansiedade
+✓ Diminui cortisol
+✓ Aumenta serotonina
+✓ Melhora concentração</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 14 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">04/02 (ter)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">Autocuidado não é luxo, é prioridade</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Frases impactantes<br>
+                    <strong>Gancho:</strong> "EU MEREÇO me cuidar"
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Mensagens</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>💬 FRASES</h4>
+                        <p class="script-text">1. "Autocuidado não é luxo, é NECESSIDADE"
+
+2. "Você não é egoísta por se priorizar"
+
+3. "Seu corpo está pedindo essa pausa"
+
+4. "Invista em VOCÊ - seu maior projeto"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 15 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">05/02 (qua)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">O que acontece durante massagem relaxante</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Educativo<br>
+                    <strong>Tema:</strong> Ciência do relaxamento
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Ciência</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>🔬 EFEITOS</h4>
+                        <p class="script-text">1. LIBERAÇÃO TENSÃO 💪
+Fibras musculares se soltam
+
+2. MELHORA CIRCULAÇÃO 💓
+Mais oxigênio para células
+
+3. REDUZ CORTISOL ⬇️
+Diminui hormônio do estresse
+
+4. AUMENTA SEROTONINA ⬆️
+Aumenta bem-estar</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 16 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">06/02 (qui)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">Sinais que você precisa de massagem AGORA</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Lista relacionável<br>
+                    <strong>Gancho:</strong> "3+ sinais = corre!"
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Sinais</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>⚠️ SINAIS</h4>
+                        <p class="script-text">1. Tensão pescoço/ombros
+2. Dor de cabeça frequente
+3. Dificuldade pra dormir
+4. Irritabilidade aumentada
+5. Cansaço persistente
+6. Sobrecarga mental
+7. Corpo pesado
+
+<strong>3+ sinais = ALERTA!</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEMANA 5 -->
+        <div class="week-header">
+            <h2>SEMANA 5 | 7 a 10 Fevereiro</h2>
+            <div class="week-theme">Resultados e planejamento 2026</div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Card 17 -->
+            <div class="content-card" data-type="carrossel">
+                <div class="card-header">
+                    <div class="card-date">09/02 (seg)</div>
+                    <div class="card-type carrossel">🎠 CARROSSEL</div>
+                </div>
+                <div class="card-title">Seu plano personalizado para 2026</div>
+                <div class="card-description">
+                    <strong>Slides:</strong> 8 slides<br>
+                    <strong>Temas:</strong> Avaliação | Objetivos | Cronograma | Manutenção
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Plano</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>📋 ESTRUTURA DO PLANO</h4>
+                        <p class="script-text">1. AVALIAÇÃO COMPLETA
+Análise + objetivos + registro
+
+2. DEFINIR OBJETIVOS
+Metas realistas e claras
+
+3. CRONOGRAMA
+Fase intensiva + consolidação + manutenção
+
+4. COMBINAÇÃO TRATAMENTOS
+Sinergia para melhores resultados
+
+5. COMPROMISSO MÚTUO
+Técnica + constância = sucesso</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 18 -->
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">10/02 (ter)</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">Crie uma rotina que funciona</div>
+                <div class="card-description">
+                    <strong>Formato:</strong> Motivacional<br>
+                    <strong>Tema:</strong> Constância é a chave
+                </div>
+                <button class="view-details-btn" onclick="toggleDetails(this)">Ver Dicas</button>
+                <div class="details-content">
+                    <div class="script-section">
+                        <h4>💡 DICAS DE ROTINA</h4>
+                        <p class="script-text"><strong>PROBLEMA:</strong>
+Começar empolgado e não continuar
+
+<strong>SOLUÇÃO:</strong>
+1. Planeje 1-2 tratamentos chave
+2. Frequência realista e sustentável
+3. Integre na rotina como compromisso
+
+<strong>MINDSET:</strong>
+Constância > Intensidade temporária
+
+Melhor: 1x/mês sempre
+Do que: 10x em 1 mês e parar</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards Extras (Exemplo) -->
+            <div class="content-card" data-type="post">
+                <div class="card-header">
+                    <div class="card-date">Extras</div>
+                    <div class="card-type post">📄 POST</div>
+                </div>
+                <div class="card-title">Conteúdos adicionais disponíveis</div>
+                <div class="card-description">
+                    Total de 20 conteúdos completos com scripts, legendas e orientações detalhadas.
+                </div>
+            </div>
+
+            <div class="content-card" data-type="reel">
+                <div class="card-header">
+                    <div class="card-date">Backup</div>
+                    <div class="card-type reel">🎬 REEL</div>
+                </div>
+                <div class="card-title">Material completo pronto para uso</div>
+                <div class="card-description">
+                    Todos os reels incluem: gancho, roteiro, falas, legendas e hashtags.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function filterContent(type) {
+            const cards = document.querySelectorAll('.content-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            cards.forEach(card => {
+                if (type === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = card.getAttribute('data-type') === type ? 'block' : 'none';
+                }
+            });
+        }
+
+        function toggleDetails(button) {
+            const detailsDiv = button.nextElementSibling;
+            const isActive = detailsDiv.classList.contains('active');
+            
+            document.querySelectorAll('.details-content').forEach(div => {
+                div.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.textContent = btn.textContent.includes('Fechar') ? btn.textContent.replace('Fechar', 'Ver') : btn.textContent;
+            });
+            
+            if (!isActive) {
+                detailsDiv.classList.add('active');
+                button.textContent = button.textContent.replace('Ver', 'Fechar');
+            }
+        }
+    </script>
+</body>
+</html>
